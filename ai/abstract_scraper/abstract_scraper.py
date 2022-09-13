@@ -14,12 +14,12 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
     handlers=[
-        logging.FileHandler(f"ai/abstract_scraper/abstract_scraper_{NOW}.log"),
+        logging.FileHandler(f"abstract_scraper/abstract_scraper_{NOW}.log"),
         logging.StreamHandler(),
     ],
 )
 
-OUTPUT_FILEPATH = f"ai/abstract_scraper/dataset_{NOW}.json"
+OUTPUT_FILEPATH = f"abstract_scraper/dataset_{NOW}.json"
 
 
 def create_entry(result: arxiv.Result) -> Dict[str, Union[str, int]]:
@@ -65,6 +65,7 @@ def main() -> None:
 
     logging.info("Deduplicating dataset")
     deduplicated_dataset = list({paper["id"]: paper for paper in dataset}.values())
+    logging.info(f"{len(deduplicated_dataset)} abstracts retrieved")
 
     logging.info(f"Saving dataset to {OUTPUT_FILEPATH}")
     with open(OUTPUT_FILEPATH, "w") as file:

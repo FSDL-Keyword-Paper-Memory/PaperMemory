@@ -58,10 +58,11 @@ def main() -> None:
     logging.info("Starting to scrape arxiv.org")
     dataset = []
 
-    for category in CATEGORIES:
-        logging.info(f"Scraping category {category}")
-        papers = get_papers_details_for_category(category)
-        dataset.extend(papers)
+    for category, subcategories in CATEGORIES.items():
+        for subcategory in subcategories:
+            logging.info(f"Scraping category {category}, subcategory: {subcategory}")
+            papers = get_papers_details_for_category(subcategory)
+            dataset.extend(papers)
 
     logging.info("Deduplicating dataset")
     deduplicated_dataset = list({paper["id"]: paper for paper in dataset}.values())

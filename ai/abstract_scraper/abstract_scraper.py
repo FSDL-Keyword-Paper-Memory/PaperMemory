@@ -40,14 +40,18 @@ def get_papers_details_for_category(
     category: str,
 ) -> List[Dict[str, Union[str, int]]]:
     papers = []
-    search = arxiv.Search(
-        query=f"cat:{category}",
-        max_results=float("inf"),
-        sort_by=arxiv.SortCriterion.SubmittedDate,
-        sort_order=arxiv.SortOrder.Descending,
+
+    client = arxiv.Client(page_size=2000, delay_seconds=10, num_retries=10)
+    search = client.results(
+        arxiv.Search(
+            query=f"cat:{category}",
+            max_results=float("inf"),
+            sort_by=arxiv.SortCriterion.SubmittedDate,
+            sort_order=arxiv.SortOrder.Descending,
+        )
     )
 
-    for result in tqdm(search.results()):
+    for result in tqdm(search):
         entry = create_entry(result)
         papers.append(entry)
 

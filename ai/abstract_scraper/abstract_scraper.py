@@ -9,6 +9,8 @@ from tqdm import tqdm
 from categories_to_scrape import CATEGORIES
 
 NOW = datetime.now()
+OUTPUT_FILEPATH = f"abstract_scraper/dataset_{NOW}.json"
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -18,8 +20,6 @@ logging.basicConfig(
         logging.StreamHandler(),
     ],
 )
-
-OUTPUT_FILEPATH = f"abstract_scraper/dataset_{NOW}.json"
 
 
 def create_entry(result: arxiv.Result) -> Dict[str, Union[str, int]]:
@@ -58,10 +58,11 @@ def main() -> None:
     logging.info("Starting to scrape arxiv.org")
     dataset = []
 
-    for category in CATEGORIES:
-        logging.info(f"Scraping category {category}")
-        papers = get_papers_details_for_category(category)
-        dataset.extend(papers)
+    for category, subcategories in CATEGORIES.items():
+        for subcategory in subcategories:
+            logging.info(f"Scraping category {category}, subcategory: {subcategory}")
+            papers = get_papers_details_for_category(subcategory)
+            dataset.extend(papers)
 
     logging.info("Deduplicating dataset")
     deduplicated_dataset = list({paper["id"]: paper for paper in dataset}.values())

@@ -9,7 +9,7 @@ from tqdm import tqdm
 from categories_to_scrape import CATEGORIES
 
 NOW = datetime.now()
-OUTPUT_FILEPATH = f"abstract_scraper/dataset_{NOW}.json"
+OUTPUT_FILEPATH = f"data/dataset_{NOW}.json"
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",

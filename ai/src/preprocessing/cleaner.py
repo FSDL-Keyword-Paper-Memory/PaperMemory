@@ -70,13 +70,13 @@ class AbstractCleaner:
     @staticmethod
     def _remove_latex_suffixes_prefixes(text: str) -> str:
         text = re.sub(
-            r"\$([a-z])\$", r"\1", text, flags=re.IGNORECASE | re.DOTALL
+            r"\$+([a-z])\$+", r"\1", text, flags=re.IGNORECASE | re.DOTALL
         )  # clean single letters
         text = re.sub(
-            r"\$\\(\w+)\s*\$", r"\1", text, flags=re.IGNORECASE | re.DOTALL
+            r"\$+\\(\w+)\s*\$+", r"\1", text, flags=re.IGNORECASE | re.DOTALL
         )  # clean symbols
         return re.sub(
-            r"\$.*?\$", "equation", text, flags=re.IGNORECASE | re.DOTALL
+            r"\$+.*?\$+", "equation", text, flags=re.IGNORECASE | re.DOTALL
         )  # clean equations
 
     @staticmethod

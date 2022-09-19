@@ -1,24 +1,49 @@
+import logging
 import re
+from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import pandas as pd
+
+NOW = datetime.now()
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler(f"logs/cleaner_{NOW}.log"),
+        logging.StreamHandler(),
+    ],
+)
 
 
 class AbstractCleaner:
     def __init__(self, filepath: str) -> None:
         self.filepath = Path(filepath)
+        logging.info("Starting to clean abstracts")
 
     def clean(self) -> None:
-        save_to = self.filepath.parent / (self.filepath.stem + "_cleaned.json")
+        save_to = self.filepath.parent / (self.filepath.stem + "_cleaned.txt")
 
+        logging.info("Loading dataset")
         df = self._load_dataset()
+        logging.info("Dropping duplicates")
         df = self._drop_duplicates(df)
+        logging.info("Removing abstracts for withdrawn papers")
         df = self._remove_abstracts_for_withdrawn_papers(df)
-        df["abstract_clean"] = df.abstract.apply(self._perform_cleaning)
-        df.to_json(save_to)
+        logging.info("Cleaning strings")
+        abstracts_clean = df.abstract.apply(self._perform_cleaning).tolist()
+        logging.info(f"Saving cleaned dataset to {save_to}")
+        self._save_dataset(abstracts_clean, save_to)
 
     def _load_dataset(self) -> pd.DataFrame:
         return pd.read_json(self.filepath)
+
+    def _save_dataset(self, clean_abstracts: List[str], save_to: Path) -> None:
+        with open(save_to, "w") as fp:
+            for clean_abstract in clean_abstracts:
+                fp.write(f"{clean_abstract}\n")
 
     def _perform_cleaning(self, text: str) -> str:
         text = self._replace_newline_character_with_whitespace(text)

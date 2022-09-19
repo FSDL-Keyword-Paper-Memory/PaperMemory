@@ -21,9 +21,9 @@ logging.basicConfig(
 class AbstractCleaner:
     def __init__(self, filepath: str) -> None:
         self.filepath = Path(filepath)
-        logging.info("Starting to clean abstracts")
 
     def clean(self) -> None:
+        logging.info("Starting to clean abstracts")
         save_to = self.filepath.parent / (self.filepath.stem + "_cleaned.txt")
 
         logging.info("Loading dataset")

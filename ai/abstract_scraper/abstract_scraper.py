@@ -16,7 +16,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
     handlers=[
-        logging.FileHandler(f"../logs/abstract_scraper_{NOW}.log"),
+        logging.FileHandler(f"logs/abstract_scraper_{NOW}.log"),
         logging.StreamHandler(),
     ],
 )

@@ -1,3 +1,4 @@
+import argparse
 import logging
 import re
 from datetime import datetime
@@ -95,3 +96,21 @@ class AbstractCleaner:
             text,
             flags=re.IGNORECASE | re.DOTALL,
         )
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--path", type=str, required=True)
+    args = parser.parse_args()
+
+    return args
+
+
+def main() -> None:
+    args = parse_args()
+    abstract_cleaner = AbstractCleaner(args.path)
+    abstract_cleaner.clean()
+
+
+if __name__ == "__main__":
+    main()

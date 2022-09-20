@@ -26,10 +26,10 @@ Output will be a JSON file that will be saved to `ai/data` directory, log will b
 
 ## Abstract cleaner
 
-To preprocess and clean abstracts downloaded from [arxiv.org](https://arxiv.org/) one should run the scrip with a code from below:
+The abstract cleaner was created based on simple EDA that is shown in `notebooks/simple_eda.ipynb`. To preprocess and clean abstracts downloaded from [arxiv.org](https://arxiv.org/) one should run the scrip with a code from below:
 
 ```bash
 make clean-abstracts path=<PATH-TO-SCRAPED-ARXIV-DATASET>
 ```
 
-Output will be a pain text file (abstract per row) that will be saved to `ai/data` directory with `_cleaned.txt` suffix, log will be stored in `ai/logs`.
+Output will be a plain text file (abstract per row) that will be saved to `ai/data` directory with `_cleaned.txt` suffix, log will be stored in `ai/logs`.

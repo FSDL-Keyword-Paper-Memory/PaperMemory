@@ -13,6 +13,7 @@ coverage
 *.log
 .env
 .pdm.toml
+__pypackages__/
 __pycache__
 !pdm.lock
 ai/data/*

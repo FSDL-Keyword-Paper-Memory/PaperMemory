@@ -6,3 +6,6 @@ clean-abstracts: $(path)
 
 prepare-devset:
 	sh tasks/prepare-devset.sh $(path)
+
+validate:
+	sh tasks/validate.sh $(path)

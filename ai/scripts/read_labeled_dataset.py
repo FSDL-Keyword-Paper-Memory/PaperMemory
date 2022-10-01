@@ -1,28 +1,32 @@
-import os
-import re
+import argparse
+from pathlib import Path
+from typing import List, Tuple
 
 import pandas as pd
+from tqdm import tqdm
 
-from ai.config import ROOT_DIR
 
-DATA_FOLDER = os.path.join(ROOT_DIR, "ai", "data", "Krapivin2009")
-KEYS_FOLDER = os.path.join(DATA_FOLDER, "keys")
-PAPERS_FOLDER = os.path.join(DATA_FOLDER, "docsutf8")
+def setup_paths(path: str) -> Tuple[Path]:
+    data_folder = Path(path)
+    keys_folder = data_folder / "keys"
+    papers_folder = data_folder / "docsutf8"
 
-papers_paths = sorted(
-    [os.path.join(PAPERS_FOLDER, elem) for elem in os.listdir(PAPERS_FOLDER)],
-    key=lambda x: float(re.findall("(\d+)", os.path.basename(x))[0]),
-)
-keys_paths = sorted(
-    [os.path.join(KEYS_FOLDER, elem) for elem in os.listdir(KEYS_FOLDER)],
-    key=lambda x: float(re.findall("(\d+)", os.path.basename(x))[0]),
-)
+    papers_paths = sorted(papers_folder.iterdir())
+    keys_paths = sorted(keys_folder.iterdir())
 
-df_dict = {}
-for i, (paper_path, keys_path) in enumerate(zip(papers_paths, keys_paths)):
-    keys = pd.read_csv(keys_path, header=None)
-    keys_list = keys.iloc[:,0].to_list()
+    save_to = data_folder / ".." / "devset.json"
 
+    return papers_paths, keys_paths, save_to
+
+
+def read_keywords(keys_path: Path) -> List[str]:
+    keys = pd.read_csv(keys_path, header=None).squeeze("columns")
+    keys_list = keys.to_list()
+
+    return keys_list
+
+
+def read_abstract(paper_path: Path) -> str:
     with open(paper_path) as f:
         lines = f.readlines()
 
@@ -33,9 +37,59 @@ for i, (paper_path, keys_path) in enumerate(zip(papers_paths, keys_paths)):
         if "--B".casefold() in line.casefold():
             indices.append(i)
             break
-    abstract = " ".join(lines[indices[0] + 1 : indices[-1]])
 
-    df_dict[os.path.basename(keys_path).split(".")[0]]={"abstract":abstract, "keywords":keys_list}
+    abstract = " ".join(lines[indices[0] + 1 : indices[-1]]).strip("\n")
 
-df = pd.DataFrame.from_dict(df_dict)
-df.to_csv(os.path.join(ROOT_DIR, "ai", "data", "labeled_abstracts_df.csv"), index=True)
+    return abstract
+
+
+def filter_keywords_in_abstract(abstract: str, keywords: List[str]) -> List[str]:
+    filtered_keywords = [keyword for keyword in keywords if keyword in abstract]
+
+    return filtered_keywords
+
+
+def append_doc(
+    df: pd.DataFrame, abstract: str, keywords: List[str], index: str
+) -> pd.DataFrame:
+    row = pd.DataFrame(
+        [
+            {
+                "abstract": abstract,
+                "keywords": keywords,
+            }
+        ],
+        index=[index],
+    )
+    df = pd.concat([df, row], axis=0)
+
+    return df
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--path", type=str, required=True)
+    args = parser.parse_args()
+
+    return args
+
+
+def main() -> None:
+    args = parse_args()
+    papers_paths, keys_paths, save_to = setup_paths(args.path)
+
+    df = pd.DataFrame()
+    for paper_path, keys_path in tqdm(zip(papers_paths, keys_paths)):
+        keys_list = read_keywords(keys_path)
+        abstract = read_abstract(paper_path)
+        keys_list_filtered = filter_keywords_in_abstract(abstract, keys_list)
+        if not keys_list_filtered:
+            continue
+
+        df = append_doc(df, abstract, keys_list, paper_path.stem)
+
+    df.to_json(save_to, orient="records")
+
+
+if __name__ == "__main__":
+    main()

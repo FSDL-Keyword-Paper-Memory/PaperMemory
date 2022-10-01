@@ -3,3 +3,6 @@ get-fresh-data:
 
 clean-abstracts: $(path)
 	sh tasks/clean-abstracts.sh $(path)
+
+prepare-devset:
+	sh tasks/prepare-devset.sh $(path)

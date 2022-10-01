@@ -51,6 +51,7 @@ class AbstractCleaner:
         text = self._remove_redundant_escapes(text)
         text = self._remove_latex_suffixes_prefixes(text)
         text = self._remove_multiple_whitespaces(text)
+        text = self._fix_no_whitespace_after_sentence(text)
         text = self._remove_urls(text)
 
         return text
@@ -61,7 +62,7 @@ class AbstractCleaner:
 
     @staticmethod
     def _remove_abstracts_for_withdrawn_papers(df: pd.DataFrame) -> pd.DataFrame:
-        pattern = r"(paper has been withdrawn)|(withdrawn due to)"
+        pattern = r"(?:paper has been withdrawn)|(?:withdrawn due to)"
         return df[~df.abstract.str.contains(pattern, case=False, regex=True)]
 
     @staticmethod
@@ -96,6 +97,10 @@ class AbstractCleaner:
             text,
             flags=re.IGNORECASE | re.DOTALL,
         )
+
+    @staticmethod
+    def _fix_no_whitespace_after_sentence(text: str) -> str:  # devset
+        return re.sub(r"([a-z]\.)([A-Z])", r"\1 \2", text)
 
 
 def parse_args() -> argparse.Namespace:

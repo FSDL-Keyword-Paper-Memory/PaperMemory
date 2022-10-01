@@ -1,4 +1,6 @@
+import logging
 import warnings
+from datetime import datetime
 from typing import List, Tuple
 
 import numpy as np
@@ -7,6 +9,17 @@ from src.predict.predict import Predictor
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
+NOW = datetime.now()
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler(f"logs/validator_{NOW}.log"),
+        logging.StreamHandler(),
+    ],
+)
+
 
 class Validator:
     def __init__(self, model: str, filepath: str) -> None:
@@ -14,15 +27,18 @@ class Validator:
         self.predictor = Predictor(model)
 
     def validate(self) -> float:
+        logging.info("Reading dataset to validate")
         df = self._read_devset()
         max_keywords_num = self._get_max_keywords_num(df)
         keywords_predicted, scores = self.predictor.predict_keywords(
             df["abstract"].to_list(), top_n=max_keywords_num
         )
         df["keywords_predicted"], df["scores"] = keywords_predicted, scores
+        logging.info("Adjusting counts of predicted keywords")
         df[["keywords_predicted", "scores"]] = df.apply(
             self._adjust_predicted_keywords_num, axis=1
         ).to_list()
+        logging.info("Calculating score")
         score = self._calculate_score(df)
 
         return score
@@ -40,8 +56,6 @@ class Validator:
     def _calculate_score(df: pd.DataFrame) -> float:
         scores = []
         for _, row in df.iterrows():
-            print(row["keywords"])
-            print(row["keywords_predicted"])
             counter = 0
             for keyword in row["keywords"]:
                 for keyword_predicted in row["keywords_predicted"]:
@@ -50,7 +64,7 @@ class Validator:
                         break
             score = counter / len(row["keywords"])
             scores.append(score)
-        print(scores)
+
         return np.mean(scores)
 
     @staticmethod

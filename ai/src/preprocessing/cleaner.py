@@ -21,33 +21,34 @@ logging.basicConfig(
 
 
 class AbstractCleaner:
-    def __init__(self, filepath: str) -> None:
-        self.filepath = Path(filepath)
+    def __init__(self) -> None:
+        pass
 
-    def clean(self) -> None:
+    def clean(self, filepath: str) -> None:
+        filepath = Path(filepath)
         logging.info("Starting to clean abstracts")
-        save_to = self.filepath.parent / (self.filepath.stem + "_cleaned.txt")
+        save_to = filepath.parent / (filepath.stem + "_cleaned.txt")
 
         logging.info("Loading dataset")
-        df = self._load_dataset()
+        df = self._load_dataset(filepath)
         logging.info("Dropping duplicates")
         df = self._drop_duplicates(df)
         logging.info("Removing abstracts for withdrawn papers")
         df = self._remove_abstracts_for_withdrawn_papers(df)
         logging.info("Cleaning strings")
-        abstracts_clean = df.abstract.apply(self._perform_cleaning).tolist()
+        abstracts_clean = df.abstract.apply(self.perform_cleaning).tolist()
         logging.info(f"Saving cleaned dataset to {save_to}")
         self._save_dataset(abstracts_clean, save_to)
 
-    def _load_dataset(self) -> pd.DataFrame:
-        return pd.read_json(self.filepath)
+    def _load_dataset(self, filepath: Path) -> pd.DataFrame:
+        return pd.read_json(filepath)
 
     def _save_dataset(self, clean_abstracts: List[str], save_to: Path) -> None:
         with open(save_to, "w") as fp:
             for clean_abstract in clean_abstracts:
                 fp.write(f"{clean_abstract}\n")
 
-    def _perform_cleaning(self, text: str) -> str:
+    def perform_cleaning(self, text: str) -> str:
         text = self._replace_newline_character_with_whitespace(text)
         text = self._remove_redundant_escapes(text)
         text = self._remove_latex_suffixes_prefixes(text)

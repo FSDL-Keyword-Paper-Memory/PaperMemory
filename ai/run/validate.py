@@ -27,8 +27,8 @@ def clean_data_if_needed(path: str):
         clean_abstracts_path = path.split(".")[0] + "_cleaned.txt"
         clean_devset_path = path.split(".")[0] + "_cleaned.json"
 
-        abstract_cleaner = AbstractCleaner(path)
-        abstract_cleaner.clean()
+        abstract_cleaner = AbstractCleaner()
+        abstract_cleaner.clean(path)
 
         devset = pd.read_json(path, orient="records")
         clean_abstract = pd.read_table(clean_abstracts_path, header=None)

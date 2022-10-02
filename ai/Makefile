@@ -9,3 +9,6 @@ prepare-devset:
 
 validate:
 	sh tasks/validate.sh $(path)
+
+predict:
+	sh tasks/predict.sh $(model) $(threshold) "$(abstract)"

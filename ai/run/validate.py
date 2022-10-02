@@ -1,43 +1,25 @@
 import argparse
-import logging
 import os
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 from src.preprocessing.cleaner import AbstractCleaner
 from src.validate.validate import Validator
 
-NOW = datetime.now()
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.INFO,
-    handlers=[
-        logging.FileHandler(f"logs/validate_{NOW}.log"),
-        logging.StreamHandler(),
-    ],
-)
-
-
 MODELS = [
     "allenai-specter",
-    "average_word_embeddings_glove.6B.300d",
-    "average_word_embeddings_komninos",
-    "paraphrase-MiniLM-L3-v2",
-    "paraphrase-MiniLM-L6-v2",
     "all-MiniLM-L6-v1",
     "all-MiniLM-L6-v2",
-    "paraphrase-MiniLM-L12-v2",
-    "paraphrase-albert-small-v2",
-    "paraphrase-TinyBERT-L6-v2",
     "paraphrase-distilroberta-base-v2",
     "all-roberta-large-v1",
     "all-mpnet-base-v1",
     "all-mpnet-base-v2",
     "all-MiniLM-L12-v1",
     "all-distilroberta-v1",
-    "all-MiniLM-L12-v2",
 ]
+
+THRESHOLDS = np.arange(1, 0.3, -0.01)
 
 
 def clean_data_if_needed(path: str):
@@ -69,13 +51,18 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    logging.info("Loading dataset. Cleaning if needed.")
     clean_devset_path = clean_data_if_needed(args.path)
+    save_output_to = (
+        "/".join(clean_devset_path.split("/")[:-1]) + "/validation_results.csv"
+    )
 
+    output = pd.DataFrame()
     for model in MODELS:
         validator = Validator(model, clean_devset_path)
-        score = validator.validate()
-        logging.info(f"Model: {model}, score: {score}")
+        results = validator.validate(THRESHOLDS)
+        output = pd.concat([output, results], axis=0, ignore_index=True)
+
+    output.to_csv(save_output_to, index=False)
 
 
 if __name__ == "__main__":

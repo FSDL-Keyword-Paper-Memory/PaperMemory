@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from typing import List, Tuple, Union
 
+import numpy as np
 from keybert import KeyBERT
 from keyphrase_vectorizers import KeyphraseCountVectorizer
 
@@ -14,6 +15,7 @@ logging.basicConfig(
         logging.FileHandler(f"logs/predictor_{NOW}.log"),
         logging.StreamHandler(),
     ],
+    force=True,
 )
 
 
@@ -22,7 +24,7 @@ class Predictor:
         self.model_name = model
 
     def predict_keywords(
-        self, abstracts: Union[str, List[str]], top_n: int
+        self, abstracts: Union[str, List[str]], top_n: int, threshold: float
     ) -> Tuple[List[List[str]], List[List[float]]]:
         output_keywords = []
         output_scores = []
@@ -49,4 +51,18 @@ class Predictor:
             output_keywords.append(keywords)
             output_scores.append(scores)
 
+        output_keywords, output_scores = self._filter_predictions(
+            output_keywords, output_scores, threshold
+        )
+
         return output_keywords, output_scores
+
+    @staticmethod
+    def _filter_predictions(
+        keywords: List[List[str]], scores: List[List[float]], threshold: float
+    ) -> Tuple[List[List[str]], List[List[float]]]:
+        mask = np.array(scores) > threshold
+        keywords = np.array(keywords)[mask]
+        scores = np.array(scores)[mask]
+
+        return keywords, scores

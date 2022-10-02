@@ -16,6 +16,7 @@ logging.basicConfig(
         logging.FileHandler(f"logs/cleaner_{NOW}.log"),
         logging.StreamHandler(),
     ],
+    force=True,
 )
 
 

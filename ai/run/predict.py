@@ -14,9 +14,7 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def main() -> None:
-    args = parse_args()
-
+def main(args: argparse.Namespace) -> None:
     cleaner = AbstractCleaner()
     clean_abstract = cleaner.perform_cleaning(args.abstract)
 
@@ -27,5 +25,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    result = main()
+    args = parse_args()
+    result = main(args)
     print("\n", result)

@@ -65,4 +65,4 @@ class Predictor:
         keywords = np.array(keywords)[mask]
         scores = np.array(scores)[mask]
 
-        return keywords, scores
+        return keywords.tolist(), scores.tolist()

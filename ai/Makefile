@@ -12,3 +12,6 @@ validate:
 
 predict:
 	sh tasks/predict.sh $(model) $(threshold) "$(abstract)"
+
+api:
+	sh tasks/api.sh

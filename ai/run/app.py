@@ -12,7 +12,7 @@ THRESHOLD = float(os.getenv("THRESHOLD"))
 app = Flask(__name__)
 
 
-@app.route("/predict/", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict():
     content = request.get_json(force=True)
     abstract = content.get("abstract")

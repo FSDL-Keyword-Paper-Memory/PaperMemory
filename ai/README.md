@@ -80,6 +80,6 @@ Example request to get prediction:
 
 ```bash
 curl -H "Content-Type: application/json" \
-     -d '{"abstract": "<ABSTRACT>"}' \
+     -d "{\"abstract\": \"<ABSTRACT>\"}" \
      -X POST <URL>:2137/predict
 ```

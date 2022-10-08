@@ -96,7 +96,6 @@ global.prefsCheckNames = [
  */
 global.prefsCheckDefaultFalse = [
     "checkDarkMode",
-    "checkDirectOpen",
     "checkStore",
     "checkScirate",
     "checkOfficialRepos",
@@ -139,6 +138,7 @@ global.knownPaperPages = {
     biorxiv: ["biorxiv.org/content"],
     cvf: ["openaccess.thecvf.com/content"],
     frontiers: ["frontiersin.org/articles"],
+    ihep: ["inspirehep.net/literature/", "inspirehep.net/files/"],
     ijcai: [(url) => /ijcai\.org\/proceedings\/\d{4}\/\d+/gi.test(url)],
     ieee: [
         "ieeexplore.ieee.org/document/",
@@ -149,10 +149,16 @@ global.knownPaperPages = {
     jmlr: [(url) => url.includes("jmlr.org/papers/v") && !url.endsWith("/")],
     nature: ["nature.com/articles/"],
     neurips: ["neurips.cc/paper/", "nips.cc/paper/"],
-    openreview: ["openreview.net/forum", "openreview.net/pdf"],
+    openreview: [
+        "openreview.net/forum",
+        "openreview.net/pdf",
+        "openreview.net/attachment",
+    ],
+    plos: [(url) => /journals\.plos\.org\/.+\/article.+id=/gi.test(url)],
     pmc: ["ncbi.nlm.nih.gov/pmc/articles/PMC"],
     pmlr: ["proceedings.mlr.press/"],
     pnas: ["pnas.org/content/", "pnas.org/doi/"],
+    rsc: ["pubs.rsc.org/en/content/article"],
     science: [
         (url) => Boolean(url.match(/science\.org\/doi\/?(abs|full|pdf|epdf)?\//g)),
     ],
@@ -215,7 +221,7 @@ global.overrideDBLPVenues = {
 };
 
 global.consolHeaderStyle =
-    "font-family:system-ui;font-size:1.2rem;font-weight:lighter;display:inline-block;border:2px solid #A41716;border-radius: 8px;padding: 16px; margin: 20px;";
+    "@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300');font-family:'Fira Code' monospace;font-size:1rem;font-weight:300;display:inline-block;border:2px solid #A41716;border-radius: 4px;padding: 12px; margin: 12px;";
 
 /**
  * Minimal Levenshtein distance between two paper titles for those to be merged

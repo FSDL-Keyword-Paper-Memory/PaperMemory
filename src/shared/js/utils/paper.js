@@ -156,6 +156,18 @@ const paperToAbs = (paper) => {
             abs = pdf.replace(/\/pdf$/, "/full");
             break;
 
+        case "ihep":
+            abs = `https://inspirehep.net/literature/${paper.id.split("-")[1]}`;
+            break;
+
+        case "plos":
+            abs = pdf.replace("/article/file?", "/article?").split("&")[0];
+            break;
+
+        case "rsc":
+            abs = pdf.replace("/articlepdf/", "/articlelanding/");
+            break;
+
         default:
             abs = "https://xkcd.com/1969/";
             break;
@@ -251,6 +263,15 @@ const paperToPDF = (paper) => {
             break;
 
         case "frontiers":
+            break;
+
+        case "ihep":
+            break;
+
+        case "plos":
+            break;
+
+        case "rsc":
             break;
 
         default:
@@ -380,6 +401,7 @@ const mergePapers = (options = { newPaper: {}, oldPaper: {} }) => {
     const defaults = {
         overwrites: ["lastOpenDate"],
         incrementCount: false,
+        syncMerge: false,
     };
 
     const opts = { ...defaults, ...extra };
@@ -393,6 +415,31 @@ const mergePapers = (options = { newPaper: {}, oldPaper: {} }) => {
     }
     if (opts.incrementCount && mergedPaper.count === 1) {
         mergedPaper.count += 1;
+    }
+    if (opts.syncMerge) {
+        // add counts
+        mergedPaper.count = oldPaper.count + newPaper.count;
+
+        // combine notes
+        mergedPaper.note = oldPaper.note ?? "";
+        if (newPaper.note && newPaper.note !== oldPaper.note) {
+            mergedPaper.note += "\n\n--[Sync Merge]--\n";
+            mergedPaper.note += newPaper.note;
+        }
+
+        // combine tags
+        mergedPaper.tags = [...oldPaper.tags, ...newPaper.tags];
+
+        mergedPaper.lastOpenDate = newPaper.lastOpenDate;
+        // keep most recent open date
+        if (newPaper.lastOpenDate > oldPaper.lastOpenDate) {
+            mergedPaper.lastOpenDate = newPaper.lastOpenDate;
+        }
+        mergedPaper.addDate = newPaper.addDate;
+        // keep oldest add date
+        if (newPaper.addDate > oldPaper.addDate) {
+            mergedPaper.addDate = newPaper.addDate;
+        }
     }
     for (const attribute of opts.overwrites) {
         if (newPaper.hasOwnProperty(attribute)) {
@@ -418,20 +465,20 @@ const updatePaperVisits = (paper) => {
  * @param {object} checks The user's preferences
  * @returns
  */
-const addOrUpdatePaper = async (
+const addOrUpdatePaper = async ({
     url,
     is,
     prefs,
     store = true,
-    contentScriptCallbacks = { update: () => {}, preprints: () => {} }
-) => {
+    contentScriptCallbacks = { update: () => {}, preprints: () => {} },
+}) => {
     // start time
     const aouStart = Date.now();
 
     let paper, isNew;
     let pwc = {};
 
-    console.group("%cPaperMemory parsing 📕", global.consolHeaderStyle);
+    consoleHeader(`PaperMemory Parsing ${String.fromCodePoint("0x1F4DD")}`);
 
     // Extract id from url
     global.state.papers = (await getStorage("papers")) ?? {};
@@ -466,8 +513,8 @@ const addOrUpdatePaper = async (
                 });
                 updateDuplicatedUrls(url, existingId);
             } else if (!existingPaper.venue && paper.venue) {
-                await updateDuplicatedUrls(paperToAbs(existingPaper), paper.id);
-                await updateDuplicatedUrls(paperToPDF(existingPaper), paper.id);
+                updateDuplicatedUrls(paperToAbs(existingPaper), paper.id);
+                updateDuplicatedUrls(paperToPDF(existingPaper), paper.id);
                 await deletePaperInStorage(existingPaper.id, global.state.papers);
 
                 existingPaper = mergePapers({
@@ -543,6 +590,7 @@ const addOrUpdatePaper = async (
     chrome.storage.local.set({ papers: global.state.papers }, async () => {
         // tell the content script the paper has been parsed/updated
         contentScriptCallbacks["update"](paper);
+        pushToRemote();
 
         let notifText;
         if (isNew || pwc.codeLink) {
@@ -604,8 +652,9 @@ const addOrUpdatePaper = async (
         }
         // tell the content script the pre-print matching procedure has finished
         contentScriptCallbacks["preprints"](paper);
+        pushToRemote();
 
-        info(`Done processing paper (${(Date.now() - aouStart) / 1000}s).`);
+        info(`Done processing paper (${(Date.now() - aouStart) / 1e3}s).`);
         console.groupEnd();
     });
 
@@ -620,8 +669,8 @@ const addOrUpdatePaper = async (
  * @param {String} match the id's uniquely identifiable string to match
  * @returns {String} paper?.id
  */
-const findPaperId = (papers, source, match) =>
-    papers.find((p) => p.source === source && p.id.includes(match))?.id;
+const findPaperForProperty = (papers, source, match, prop = "id") =>
+    papers.find((p) => p.source === source && p[prop].includes(match))?.id;
 
 /**
  * Parses a paper's id from a url.
@@ -660,7 +709,7 @@ const parseIdFromUrl = async (url) => {
         idForUrl = parseCVFUrl(url).id;
     } else if (is.openreview) {
         const OR_id = url.match(/id=\w+/)[0].replace("id=", "");
-        idForUrl = findPaperId(papers, "openreview", OR_id);
+        idForUrl = findPaperForProperty(papers, "openreview", OR_id);
     } else if (is.biorxiv) {
         url = cleanBiorxivURL(url);
         let id = url.split("/").last();
@@ -685,18 +734,18 @@ const parseIdFromUrl = async (url) => {
             url = url.slice(0, -1);
         }
         const key = url.split("/").last();
-        idForUrl = findPaperId(papers, "acl", key);
+        idForUrl = findPaperForProperty(papers, "acl", key);
     } else if (is.pnas) {
         url = url.replace(".full.pdf", "");
         const pid = url.endsWith("/")
             ? url.split("/").slice(-2)[0]
             : url.split("/").slice(-1)[0];
 
-        idForUrl = findPaperId(papers, "pnas", pid);
+        idForUrl = findPaperForProperty(papers, "pnas", pid);
     } else if (is.nature) {
         url = url.replace(".pdf", "").split("#")[0];
         const hash = url.split("/").last();
-        idForUrl = findPaperId(papers, "nature", hash);
+        idForUrl = findPaperForProperty(papers, "nature", hash);
     } else if (is.acs) {
         url = noParamUrl(url)
             .replace("pubs.acs.org/doi/pdf/", "/doi/")
@@ -717,7 +766,7 @@ const parseIdFromUrl = async (url) => {
         idForUrl = `JMLR-${year}_${jid}`;
     } else if (is.pmc) {
         const pmcid = url.match(/PMC\d+/g)[0].replace("PMC", "");
-        idForUrl = findPaperId(papers, "pmc", pmcid);
+        idForUrl = findPaperForProperty(papers, "pmc", pmcid);
     } else if (is.ijcai) {
         const procId = url.endsWith(".pdf")
             ? url
@@ -730,14 +779,14 @@ const parseIdFromUrl = async (url) => {
         idForUrl = `IJCAI-${year}_${procId}`;
     } else if (is.acm) {
         const doi = url.replace(/\/doi\/?(pdf|abs|full)?\//, "/doi/").split("/doi/")[1];
-        idForUrl = findPaperId(papers, "acm", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "acm", miniHash(doi));
     } else if (is.ieee) {
         const articleId = url.includes("ieee.org/document/")
             ? url.split("ieee.org/document/")[1].match(/\d+/)[0]
             : url.includes("ieee.org/abstract/document/")
             ? url.split("ieee.org/abstract/document/")[1].match(/\d+/)[0]
             : url.split("arnumber=")[1].match(/\d+/)[0];
-        idForUrl = findPaperId(papers, "ieee", articleId);
+        idForUrl = findPaperForProperty(papers, "ieee", articleId);
     } else if (is.springer) {
         const types = global.sourceExtras.springer.types;
         let type = types.filter((c) => url.includes(`/${c}/`))[0];
@@ -748,28 +797,42 @@ const parseIdFromUrl = async (url) => {
             type = "content/pdf";
         }
         let doi = url.split(`/${type}/`)[1].split("?")[0].replace(".pdf", "");
-        idForUrl = findPaperId(papers, "springer", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "springer", miniHash(doi));
     } else if (is.aps) {
         const [journal, type] = parseUrl(url.split("#")[0])
             .pathname.split("/")
             .slice(1, 3);
         const doi = url.split(`/${journal}/${type}/`).last();
-        idForUrl = findPaperId(papers, "aps", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "aps", miniHash(doi));
     } else if (is.wiley) {
         const doi = url.split("?")[0].split("#")[0].split("/").slice(-2).join("/");
-        idForUrl = findPaperId(papers, "wiley", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "wiley", miniHash(doi));
     } else if (is.sciencedirect) {
         const pii = url.split("/pii/")[1].split("/")[0].split("#")[0].split("?")[0];
-        idForUrl = findPaperId(papers, "sciencedirect", miniHash(pii));
+        idForUrl = findPaperForProperty(papers, "sciencedirect", miniHash(pii));
     } else if (is.science) {
         doi = noParamUrl(url).split("/doi/")[1];
         if (!doi.startsWith("10.")) {
             doi = doi.split("/").slice(1).join("/");
         }
-        idForUrl = findPaperId(papers, "science", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "science", miniHash(doi));
     } else if (is.frontiers) {
         doi = noParamUrl(url).split("/articles/")[1].split("/").slice(0, -1).join("/");
-        idForUrl = findPaperId(papers, "frontiers", miniHash(doi));
+        idForUrl = findPaperForProperty(papers, "frontiers", miniHash(doi));
+    } else if (is.ihep) {
+        if (url.includes("/literature/")) {
+            const num = noParamUrl(url).match(/\/literature\/(\d+)/)[1];
+            idForUrl = findPaperForProperty(papers, "ihep", num);
+        } else {
+            const hash = noParamUrl(url).split("/files/")[1].split("/")[0];
+            idForUrl = findPaperForProperty(papers, "ihep", hash, "pdfLink");
+        }
+    } else if (is.plos) {
+        const doi = url.split("?id=").last().split("&")[0];
+        idForUrl = findPaperForProperty(papers, "plos", miniHash(doi));
+    } else if (is.rsc) {
+        const rscId = noParamUrl(url).split("/").last();
+        idForUrl = findPaperForProperty(papers, "rsc", miniHash(rscId));
     } else if (is.localFile) {
         idForUrl = is.localFile;
     } else {

@@ -18,16 +18,16 @@
 
 [![](https://img.shields.io/chrome-web-store/stars/hmebhknlgddhfbbdhgplnillngljgmdi)](https://chrome.google.com/webstore/detail/paper-memory/hmebhknlgddhfbbdhgplnillngljgmdi)
 [![](https://img.shields.io/badge/buy%20me-a%20coffee%20%E2%98%95%EF%B8%8F-FFDD03)](https://www.buymeacoffee.com/vict0rsch)
-[![](https://img.shields.io/badge/Source%20%5BWIP%5D-v0.5.8-important)](https://github.com/vict0rsch/PaperMemory)
-[![](https://img.shields.io/badge/Release-v0.5.7-A41716)](https://github.com/vict0rsch/PaperMemory/tree/0.5.7)
+[![](https://img.shields.io/badge/Source%20%5BWIP%5D-v0.5.9-important)](https://github.com/vict0rsch/PaperMemory)
+[![](https://img.shields.io/badge/Release-v0.5.9-A41716)](https://github.com/vict0rsch/PaperMemory/tree/0.5.7)
 
 <br/>
 
-An **automated**, web-based and minimalist reference manager that also finds code repositories.
+An **automated**, web-based and minimalist reference manager that also finds code repositories and published versions of preprints.
 
 It is not meant to replace, rather complete more standard reference managers as Zotero etc.
 
-This browser extension allows you to do automatically store research papers you read, find a code repository and much more:
+This browser extension allows you to automatically store research papers you read, find a code repository and much more:
 
 1. 🏬 **Automatically record papers** you open, without clicking anywhere. You can then **search** them, **tag** them, **comment** them and link a code repository.
 2. 💻 **Automatically find code** repositories using PapersWithCode's API
@@ -79,6 +79,8 @@ This browser extension allows you to do automatically store research papers you 
 * Science Direct
 * Science (Science, Science Immunology, Science Robotics etc.)
 * FrontiersIn (Frontiers in Neuroscience, Frontiers in Neuroscience, Frontiers in Microbiology etc.)
+* PLOS
+* Royal Society of Chemistry
 * [Sci-Hub](#ad-hoc-pdfs)
 * [Add more](https://github.com/vict0rsch/PaperMemory/issues/13)
 
@@ -186,6 +188,7 @@ In the extension's `options` (right click on the icon or in the popup's menu) yo
 * **Source filtering**: filter out some paper sources you don't want to record papers from
 * **Custom title function**: provide Javascript code to generate your own web page titles and pdf filenames based on a paper's attributes
 * **Data management**: export/load your memory data and export the bibliography as a `.bib` file
+* **Online Synchronization**: use Github Gists to sync your papers across devices
 
 <p align="center">
   <img src="https://raw.github.com/vict0rsch/PaperMemory/master/extra/imgs/opt_concat.png?raw=true">

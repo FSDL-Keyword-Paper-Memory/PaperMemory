@@ -30,6 +30,8 @@
 	<script defer src="../../shared/js/utils/logTrace.js"></script>
 	<script defer src="../../shared/js/utils/miniquery.js"></script>
 	<script defer src="../../shared/js/utils/config.js"></script>
+	<script defer src="../../shared/js/utils/gist.js"></script>
+	<script defer src="../../shared/js/utils/sync.js"></script>
 	<script defer src="../../shared/js/utils/functions.js"></script>
 	<script defer src="../../shared/js/utils/data.js"></script>
 	<script defer src="../../shared/js/utils/paper.js"></script>
@@ -248,6 +250,19 @@
 			<path d="M10 10l4 4m0 -4l-4 4" />
 		</svg>
 	</div>
+	<div id="sync-popup-feedback" style="display: none;">
+		<div id="sync-popup-syncing" style="display: none; align-items: center;">
+			Syncing <div class="pm-loader"
+				style="width: 12px; height: 12px; border-width: 2px; display: inline-block; margin: auto; margin-left: 8px;">
+			</div>
+		</div>
+		<div id="sync-popup-synced" style="display: none;">
+			Synced ✅
+		</div>
+		<div id="sync-popup-synced" style="display: none;">
+			Sync failed ❌
+		</div>
+	</div>
 
 	<div id="menu-switch" tabindex="0" title="Open settings" class="rounded">
 		<svg viewBox="0 0 24 24" id='menu-switch-svg' class="tabler-icon rounded">
@@ -432,10 +447,27 @@
 			<div id="modal-whatsnew-content" class="popup-modal-content" style="display: none;">
 				<h3 style="margin-bottom: 0px;">What's new</h3>
 				<ul>
-					<li><strong>Beta from source - WIP: </strong> 0.5.8
+					<li><strong>Current: </strong><a
+							href="https://github.com/vict0rsch/PaperMemory/releases/tag/0.5.9">0.5.9</a>
+						<em>(2022-09-30)</em>
+						<ul>
+							<li>[dev] Fix a bug that would display arxiv enhancements twice for some papers with a
+								delayed venue matching</li>
+							<li>[new source] Add PLOS journals as paper sources</li>
+							<li>[new source] Add Royal Society of Chemistry journals as paper sources</li>
+						</ul>
 					</li>
 					<li><strong>Current: </strong><a
-							href="https://github.com/vict0rsch/PaperMemory/releases/tag/0.5.7">0.5.7</a>
+							href="https://github.com/vict0rsch/PaperMemory/releases/tag/0.5.8">0.5.8</a>
+						<em>(2022-09-27)</em>
+						<ul>
+							<li>[new source] Add Inspire HEP paper source</li>
+							<li>[feature] Display a list of all existing tags when searching for <code>t:</code></li>
+							<li>[dev] Add Popup warnings component</li>
+							<li>[dev] Fix OpenReview paper parsing</li>
+						</ul>
+					</li>
+					<li><a href="https://github.com/vict0rsch/PaperMemory/releases/tag/0.5.7">0.5.7</a>
 						<em>(2022-06-13)</em>
 						<ul>
 							<li>[new source] Add FrontiersIn paper source</li>
@@ -762,6 +794,10 @@
 					</li>
 					<li style="margin-top: 6px">
 						You deleted the paper (refresh the page to add it back)
+					</li>
+					<li style="margin-top: 6px">
+						Your memory was synced and the remote data did not have the paper (it was deleted on another
+						device) (refresh the page to add it back)
 					</li>
 					<li style="margin-top: 6px">
 						There was an error parsing the paper's data (you can check the console

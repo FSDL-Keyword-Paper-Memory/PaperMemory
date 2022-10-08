@@ -68,6 +68,13 @@
             "venue": "IEEE Access"
         }
     ],
+    "ihep": [
+        "https://inspirehep.net/literature/2095720",
+        "https://inspirehep.net/files/d49a276d7d2370cce978dd900d94ab84",
+        {
+            "venue": "Nucl. Instrum. Meth. A"
+        }
+    ],
     "iop": [
         "https://iopscience.iop.org/article/10.1149/2.1051908jes",
         "https://iopscience.iop.org/article/10.1149/2.1051908jes/pdf",
@@ -138,5 +145,20 @@
     "springer": [
         "https://link.springer.com/article/10.1007/s41095-022-0271-y",
         "https://link.springer.com/content/pdf/10.1007/s41095-022-0271-y.pdf"
+    ],
+    "plos": [
+        "https://journals.plos.org/climate/article?id=10.1371/journal.pclm.0000068",
+        "https://journals.plos.org/climate/article/file?id=10.1371/journal.pclm.0000068&type=printable",
+        {
+            "noPdf": true,
+            "venue": "plos climate"
+        }
+    ],
+    "rsc": [
+        "https://pubs.rsc.org/en/content/articlelanding/2022/dd/d2dd00066k",
+        "https://pubs.rsc.org/en/content/articlepdf/2022/dd/d2dd00066k",
+        {
+            "venue": "digital discovery"
+        }
     ]
 }

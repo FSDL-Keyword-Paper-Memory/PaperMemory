@@ -19,6 +19,7 @@ logging.basicConfig(
         logging.FileHandler(f"logs/abstract_scraper_{NOW}.log"),
         logging.StreamHandler(),
     ],
+    force=True,
 )
 
 

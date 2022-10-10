@@ -1,3 +1,4 @@
+
 /**
  * Close the menu's overlay: slide div up and update button svg
  */
@@ -121,6 +122,26 @@ const setStandardPopupClicks = () => {
     addListener("memory-switch", "click", handleMemorySwitchClick);
 };
 
+
+async function postData(url = '', data = {}) {
+  // Default options are marked with *
+    const response = await fetch(url, {
+    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+    mode: 'cors', // no-cors, *cors, same-origin
+    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: 'same-origin', // include, *same-origin, omit
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    redirect: 'follow', // manual, *follow, error
+    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+}
+
+
 /**
  * Main function when opening the window:
  * + Display the appropriate html depending on whether the user is currently looking at a paper
@@ -138,6 +159,21 @@ const popupMain = async (url, is, manualTrigger = false) => {
         // style("popup-modal-wrapper", "max-width", "500px");
         // style("popup-modal-wrapper", "width", "500px");
     }
+
+    console.log(url)
+    const arxivId = url.match(/\/(\d{4}\.\d{4,5})/)[1];
+    const response = await fetchArxivXML(arxivId);
+    const xmlData = await response.text();
+    var doc = new DOMParser().parseFromString(xmlData.replaceAll("\n", ""), "text/xml");
+    // console.log(doc.querySelector("summary").innerHTML)
+
+    const keywords = postData('https://keywords.woronkiewicz.pl/predict', { abstract: doc.querySelector("summary").innerHTML})
+        .then((data) => data).then((keywords) => {
+    console.log(keywords.keywords.slice(0,3));
+    setTextId("popup-tag-suggestion", keywords.keywords.slice(0,3));
+
+  });
+    // console.log(keywords)
 
     addListener(document, "keydown", handlePopupKeydown);
 

@@ -610,7 +610,7 @@ const setFormChangeListener = (id, isPopup) => {
  * @param {boolean} isPopup Whether the function is called to monitor the single
  * popup edit form or the set of memory-items' forms
  */
-const monitorPaperEdits = (id, isPopup) => (e) => {
+const monitorPaperEdits = (id, isPopup,change=false) => (e) => {
     let paperId;
     if (typeof id === "undefined") {
         paperId = eventId(e);
@@ -619,7 +619,7 @@ const monitorPaperEdits = (id, isPopup) => (e) => {
     }
     const edits = getPaperEdits(paperId, isPopup);
     const paper = global.state.papers[paperId];
-    let change = false;
+
     let refs = {};
     for (const key in edits) {
         const ref = paper[key];

@@ -177,6 +177,8 @@ ${note}</textarea
 const getPopupEditFormHTML = (paper) => {
     const id = paper.id;
     const tagOptions = getTagsOptions(paper);
+    console.log(tagOptions)
+    console.log("tu")
     const note = paper.note || "";
     const checked = "";
     const displayId = getDisplayId(paper.id);

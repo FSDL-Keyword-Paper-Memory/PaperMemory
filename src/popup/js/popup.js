@@ -165,15 +165,6 @@ const popupMain = async (url, is, manualTrigger = false) => {
     const response = await fetchArxivXML(arxivId);
     const xmlData = await response.text();
     var doc = new DOMParser().parseFromString(xmlData.replaceAll("\n", ""), "text/xml");
-    // console.log(doc.querySelector("summary").innerHTML)
-
-    const keywords = postData('https://keywords.woronkiewicz.pl/predict', { abstract: doc.querySelector("summary").innerHTML})
-        .then((data) => data).then((keywords) => {
-    console.log(keywords.keywords.slice(0,3));
-    setTextId("popup-tag-suggestion", keywords.keywords.slice(0,3));
-
-  });
-    // console.log(keywords)
 
     addListener(document, "keydown", handlePopupKeydown);
 
@@ -239,6 +230,25 @@ const popupMain = async (url, is, manualTrigger = false) => {
         const paper = global.state.papers[id];
         const eid = paper.id.replaceAll(".", "\\.");
 
+        postData('https://keywords.woronkiewicz.pl/predict', { abstract: doc.querySelector("summary").innerHTML})
+        .then((data) => data).then((keywords) => {
+        console.log(keywords.keywords);
+        const suggestedTags = [];
+        for (const key_string of keywords.keywords){
+            console.log(key_string);
+
+            const words = key_string.split(' ').filter(w => w !== '');
+            console.log(words[0]);
+            for (const  word of words) {
+                console.log(word);
+                paper.tags.push(word);
+                global.state.paperTags.push(word);
+                suggestedTags.push(word);
+            }
+        }
+        setTextId("popup-tag-suggestion", "Suggested Keywords:\n" + suggestedTags.join(', '));
+        });
+
         // -----------------------------
         // -----  Fill Paper Data  -----
         // -----------------------------
@@ -296,6 +306,10 @@ const popupMain = async (url, is, manualTrigger = false) => {
             const link = prefs.checkPreferPdf ? paperToPDF(paper) : paperToAbs(paper);
             const text = prefs.checkPreferPdf ? "PDF" : "Abstract";
             copyAndConfirmMemoryItem(id, link, `${text} link copied!`, true);
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+            handleMemorySaveEdits(id);
+            handlePopupSaveEdits(id)
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
         });
         addListener(`popup-memory-item-md--${id}`, "click", () => {
             const prefs = global.state.prefs;

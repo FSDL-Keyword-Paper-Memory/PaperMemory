@@ -488,7 +488,7 @@ const tablerSvg = (pathName, id, classNames) => {
             </svg>`;
 
         case "tag":
-            return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            return `<svg xmlns="http://www.w3.org/2000/svg"
                  ${id} ${classNames} viewBox="0 0 24 24">
                 <path d="M6 1h6v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8V1z"/>
                 <path

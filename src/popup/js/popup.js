@@ -1,3 +1,4 @@
+
 /**
  * Close the menu's overlay: slide div up and update button svg
  */
@@ -121,6 +122,26 @@ const setStandardPopupClicks = () => {
     addListener("memory-switch", "click", handleMemorySwitchClick);
 };
 
+
+async function postData(url = '', data = {}) {
+  // Default options are marked with *
+    const response = await fetch(url, {
+    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+    mode: 'cors', // no-cors, *cors, same-origin
+    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: 'same-origin', // include, *same-origin, omit
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    redirect: 'follow', // manual, *follow, error
+    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+}
+
+
 /**
  * Main function when opening the window:
  * + Display the appropriate html depending on whether the user is currently looking at a paper
@@ -138,6 +159,12 @@ const popupMain = async (url, is, manualTrigger = false) => {
         // style("popup-modal-wrapper", "max-width", "500px");
         // style("popup-modal-wrapper", "width", "500px");
     }
+
+    console.log(url)
+    const arxivId = url.match(/\/(\d{4}\.\d{4,5})/)[1];
+    const response = await fetchArxivXML(arxivId);
+    const xmlData = await response.text();
+    var doc = new DOMParser().parseFromString(xmlData.replaceAll("\n", ""), "text/xml");
 
     addListener(document, "keydown", handlePopupKeydown);
 
@@ -203,6 +230,28 @@ const popupMain = async (url, is, manualTrigger = false) => {
         const paper = global.state.papers[id];
         const eid = paper.id.replaceAll(".", "\\.");
 
+        postData('https://keywords.woronkiewicz.pl/predict', { abstract: doc.querySelector("summary").innerHTML})
+        .then((data) => data).then((keywords) => {
+        console.log(keywords.keywords);
+        const suggestedTags = [];
+        for (const key_string of keywords.keywords){
+            console.log(key_string);
+
+            const words = key_string.split(' ').filter(w => w !== '');
+            console.log(words[0]);
+            for (const  word of words) {
+                console.log(word);
+                paper.tags.push(word);
+                global.state.paperTags.push(word);
+                suggestedTags.push(word);
+            }
+        }
+        setTextId("popup-tag-suggestion", "Suggested Keywords:\n" + suggestedTags.join(', '));
+        console.log("paper  tags");
+        console.log(paper);
+        console.log(paper.tags);
+        });
+
         // -----------------------------
         // -----  Fill Paper Data  -----
         // -----------------------------
@@ -260,6 +309,10 @@ const popupMain = async (url, is, manualTrigger = false) => {
             const link = prefs.checkPreferPdf ? paperToPDF(paper) : paperToAbs(paper);
             const text = prefs.checkPreferPdf ? "PDF" : "Abstract";
             copyAndConfirmMemoryItem(id, link, `${text} link copied!`, true);
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+            handleMemorySaveEdits(id);
+            handlePopupSaveEdits(id)
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
         });
         addListener(`popup-memory-item-md--${id}`, "click", () => {
             const prefs = global.state.prefs;
@@ -283,6 +336,16 @@ const popupMain = async (url, is, manualTrigger = false) => {
         addListener(`popup-memory-item-download--${id}`, "click", async () => {
             downloadPaperPdf(paper);
         });
+
+        addListener(`popup-memory-item-use-suggested-tags--${id}`, "click", () => {
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+            handleMemorySaveEdits(id);
+            handlePopupSaveEdits(id)
+            global.state.paperTags=[]
+            // setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+        });
+
+
     } else {
         if (prefs.checkDirectOpen) {
             dispatch("memory-switch", "click");

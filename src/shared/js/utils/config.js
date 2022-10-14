@@ -38,6 +38,7 @@ global.state = {
     papers: {}, // (id => object)
     papersList: [], // [papers]
     paperTags: new Set(), // (Set(string))
+    suggestedTags: new Set(), // (Set(string))
     pdfTitleFn: null, // function(paper) => string
     showFavorites: false,
     sortedPapers: [], // [papers]

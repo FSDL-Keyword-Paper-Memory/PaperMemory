@@ -177,6 +177,8 @@ ${note}</textarea
 const getPopupEditFormHTML = (paper) => {
     const id = paper.id;
     const tagOptions = getTagsOptions(paper);
+    console.log(tagOptions)
+    console.log("tu")
     const note = paper.note || "";
     const checked = "";
     const displayId = getDisplayId(paper.id);
@@ -317,6 +319,14 @@ const getPopupPaperIconsHTML = (paper, currentUrl, is) => {
         </div>
     `;
     return /*html*/ `${scirate}
+        <div
+            tabindex="0"
+            class="memory-item-svg-div"
+            id="popup-memory-item-use-suggested-tags--${id}"
+            title="Use suggested tags"
+        >
+            ${tablerSvg("tag", "", ["popup-click-svg"])}
+        </div>
         <div
             tabindex="0"
             class="memory-item-svg-div"

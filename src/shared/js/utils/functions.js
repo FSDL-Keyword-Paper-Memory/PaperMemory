@@ -487,6 +487,17 @@ const tablerSvg = (pathName, id, classNames) => {
                 <line x1="5" y1="12" x2="11" y2="12" />
             </svg>`;
 
+        case "tag":
+            return `<svg xmlns="http://www.w3.org/2000/svg"
+                 ${id} ${classNames} viewBox="0 0 24 24">
+                <path d="M6 1h6v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8V1z"/>
+                <path
+                    d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                <path
+                    d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+            </svg>`;
+
+
         default:
             return "";
     }
@@ -610,7 +621,7 @@ const setFormChangeListener = (id, isPopup) => {
  * @param {boolean} isPopup Whether the function is called to monitor the single
  * popup edit form or the set of memory-items' forms
  */
-const monitorPaperEdits = (id, isPopup) => (e) => {
+const monitorPaperEdits = (id, isPopup,change=false) => (e) => {
     let paperId;
     if (typeof id === "undefined") {
         paperId = eventId(e);
@@ -619,7 +630,7 @@ const monitorPaperEdits = (id, isPopup) => (e) => {
     }
     const edits = getPaperEdits(paperId, isPopup);
     const paper = global.state.papers[paperId];
-    let change = false;
+
     let refs = {};
     for (const key in edits) {
         const ref = paper[key];

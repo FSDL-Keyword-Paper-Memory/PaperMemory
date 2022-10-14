@@ -322,6 +322,14 @@ const getPopupPaperIconsHTML = (paper, currentUrl, is) => {
         <div
             tabindex="0"
             class="memory-item-svg-div"
+            id="popup-memory-item-use-suggested-tags--${id}"
+            title="Use suggested tags"
+        >
+            ${tablerSvg("tag", "", ["popup-click-svg"])}
+        </div>
+        <div
+            tabindex="0"
+            class="memory-item-svg-div"
             id="popup-memory-item-link--${id}"
             title="Open Paper ${name} Page"
         >

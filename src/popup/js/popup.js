@@ -247,6 +247,9 @@ const popupMain = async (url, is, manualTrigger = false) => {
             }
         }
         setTextId("popup-tag-suggestion", "Suggested Keywords:\n" + suggestedTags.join(', '));
+        console.log("paper  tags");
+        console.log(paper);
+        console.log(paper.tags);
         });
 
         // -----------------------------
@@ -333,6 +336,16 @@ const popupMain = async (url, is, manualTrigger = false) => {
         addListener(`popup-memory-item-download--${id}`, "click", async () => {
             downloadPaperPdf(paper);
         });
+
+        addListener(`popup-memory-item-use-suggested-tags--${id}`, "click", () => {
+            setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+            handleMemorySaveEdits(id);
+            handlePopupSaveEdits(id)
+            global.state.paperTags=[]
+            // setHTML("popup-memory-edit", getPopupEditFormHTML(paper));
+        });
+
+
     } else {
         if (prefs.checkDirectOpen) {
             dispatch("memory-switch", "click");
